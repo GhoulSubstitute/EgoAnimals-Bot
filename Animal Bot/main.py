@@ -11,9 +11,14 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 # Load commands from commands folder
-bot.load_extension("commands.fun")
-bot.load_extension("commands.animals")
-bot.load_extension("commands.moderation")
+async def setup_extensions():
+    await bot.load_extension("commands.fun")
+    await bot.load_extension("commands.animals")
+    await bot.load_extension("commands.moderation")
+
+bot.loop.run_until_complete(setup_extensions())
+
 
 
 bot.run(TOKEN)
+
