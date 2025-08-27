@@ -1,24 +1,18 @@
-import os
-import discord
 from discord.ext import commands
+import os
 
-# Get token from environment variable
-TOKEN = os.getenv("TOKEN") 
+class AnimalBot(commands.Bot):
+    def __init__(self):
+        intents = discord.Intents.default()
+        intents.message_content = True
+        super().__init__(command_prefix="!", intents=intents)
+        self.TOKEN = os.getenv("TOKEN")
 
-intents = discord.Intents.default()
-intents.message_content = True
+    async def setup_hook(self):
+        # Load all cogs
+        await self.load_extension("commands.fun")        # your random image drops cog
+        await self.load_extension("commands.animals")    # other animal commands
+        await self.load_extension("commands.moderation") # moderation cog if needed
 
-bot = commands.Bot(command_prefix="!", intents=intents)
-
-# Load commands from commands folder
-async def setup_extensions():
-    await bot.load_extension("commands.fun")
-    await bot.load_extension("commands.animals")
-    await bot.load_extension("commands.moderation")
-
-bot.loop.run_until_complete(setup_extensions())
-
-
-
-bot.run(TOKEN)
-
+bot = AnimalBot()
+bot.run(bot.TOKEN)
