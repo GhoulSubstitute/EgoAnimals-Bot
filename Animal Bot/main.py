@@ -1,5 +1,7 @@
+import discord
 from discord.ext import commands
 import os
+
 
 class AnimalBot(commands.Bot):
     def __init__(self):
@@ -16,3 +18,4 @@ class AnimalBot(commands.Bot):
 
 bot = AnimalBot()
 bot.run(bot.TOKEN)
+
