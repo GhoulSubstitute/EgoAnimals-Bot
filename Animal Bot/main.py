@@ -9,7 +9,7 @@ class AnimalBot(commands.Bot):
         intents = discord.Intents.default()
         intents.messages = True
         intents.guilds = True
-        super().__init__(command_prefix="c!", intents=intents)
+        super().__init__(command_prefix="!", intents=intents)
 
     async def setup_hook(self):
         await self.load_extension("commands.animals")
@@ -18,4 +18,5 @@ class AnimalBot(commands.Bot):
 
 bot = AnimalBot()
 bot.run(TOKEN)
+
 
