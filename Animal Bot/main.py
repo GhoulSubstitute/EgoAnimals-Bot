@@ -8,6 +8,7 @@ class AnimalBot(commands.Bot):
     def __init__(self):
         intents = discord.Intents.default()
         intents.messages = True
+        intents.message_content = True
         intents.guilds = True
         super().__init__(command_prefix="!", intents=intents, help_command=commands.DefaultHelpCommand())
 
@@ -18,6 +19,7 @@ class AnimalBot(commands.Bot):
 
 bot = AnimalBot()
 bot.run(TOKEN)
+
 
 
 
