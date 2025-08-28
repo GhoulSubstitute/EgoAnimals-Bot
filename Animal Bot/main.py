@@ -1,127 +1,79 @@
 import discord
 from discord.ext import commands, tasks
-import random
 import asyncio
-import json
-from pathlib import Path
+import random
 import os
 
-TOKEN = os.getenv("TOKEN")
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-DATA_FILE = Path("animal_data.json")
-
-# Load saved data
-if DATA_FILE.exists():
-    with open(DATA_FILE, "r") as f:
-        data = json.load(f)
-else:
-    data = {"channels": {}, "scores": {}}
-
-# 🖼️ Animal images
-ANIMALS = {
-    "dog": "https://place-puppy.com/400x400",
-    "cat": "https://placekitten.com/400/400",
-    "rabbit": "https://loremflickr.com/400/400/rabbit",
-    "fox": "https://loremflickr.com/400/400/fox",
+# Store guild-specific channel
+drop_channels = {}
+# Store leaderboard
+leaderboard = {}
+# Animals with image URLs
+animals = {
+    "cat": "https://placekitten.com/300/300",
+    "dog": "https://placedog.net/500?id=1",
+    "panda": "https://i.imgur.com/4AiXzf8.jpeg",
+    "lion": "https://i.imgur.com/1V3Z1Hf.jpeg"
 }
-
-current_animals = {}  # guild_id -> (animal, user_caught)
-
-
-def save_data():
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=4)
-
 
 @bot.event
 async def on_ready():
-    print(f"✅ Logged in as {bot.user}")
-    animal_drops.start()
+    print(f"Logged in as {bot.user}")
+    drop_animals.start()
 
-
-@commands.has_permissions(manage_guild=True)
-@bot.command(help="Set the channel where animals will drop. Usage: !setchannel <channel_id>")
+@bot.command()
 async def setchannel(ctx, channel_id: int):
-    channel = ctx.guild.get_channel(channel_id)
-    if not channel:
-        await ctx.send("❌ Invalid channel ID.")
+    """Set the channel where animals will drop"""
+    drop_channels[ctx.guild.id] = channel_id
+    await ctx.send(f"Drops will now appear in <#{channel_id}>")
+
+@bot.command()
+async def leaderboard_cmd(ctx):
+    """Show leaderboard"""
+    if not leaderboard:
+        await ctx.send("No winners yet 😢")
         return
 
-    data["channels"][str(ctx.guild.id)] = channel_id
-    save_data()
-    await ctx.send(f"✅ Animal drop channel set to {channel.mention}")
+    sorted_lb = sorted(leaderboard.items(), key=lambda x: x[1], reverse=True)
+    text = "\n".join([f"{i+1}. <@{uid}> - {score}" for i, (uid, score) in enumerate(sorted_lb)])
+    await ctx.send(f"🏆 **Leaderboard** 🏆\n{text}")
 
+@tasks.loop(minutes=random.randint(5, 25))
+async def drop_animals():
+    await asyncio.sleep(random.randint(10, 60))  # extra randomness
+    for guild_id, channel_id in drop_channels.items():
+        channel = bot.get_channel(channel_id)
+        if channel:
+            name, url = random.choice(list(animals.items()))
+            await channel.send(f"Guess the animal! 🐾", file=discord.File(fp=await url_to_file(url), filename=f"{name}.jpg"))
 
-@bot.command(help="Show the animal catching leaderboard.")
-async def leaderboard(ctx):
-    guild_scores = data["scores"].get(str(ctx.guild.id), {})
-    if not guild_scores:
-        await ctx.send("🏆 No catches yet!")
-        return
-
-    sorted_scores = sorted(guild_scores.items(), key=lambda x: x[1], reverse=True)
-    desc = "\n".join([f"<@{uid}> — **{score}**" for uid, score in sorted_scores[:10]])
-
-    embed = discord.Embed(
-        title="🏆 Animal Catch Leaderboard",
-        description=desc,
-        color=discord.Color.gold()
-    )
-    await ctx.send(embed=embed)
-
-
-@tasks.loop(minutes=5)
-async def animal_drops():
-    await bot.wait_until_ready()
-
-    for guild in bot.guilds:
-        channel_id = data["channels"].get(str(guild.id))
-        if not channel_id:
-            continue
-
-        channel = guild.get_channel(channel_id)
-        if not channel:
-            continue
-
-        # 1 in 3 chance every 5 min → avg ~15 min, max ~25
-        if random.random() < 0.33:
-            animal, img_url = random.choice(list(ANIMALS.items()))
-            embed = discord.Embed(
-                title="🐾 A wild animal appeared!",
-                description=f"Type **{animal}** to catch it!",
-                color=discord.Color.green()
-            )
-            embed.set_image(url=img_url)
-            await channel.send(embed=embed)
-            current_animals[guild.id] = (animal, None)
-
+async def url_to_file(url: str):
+    import aiohttp
+    import io
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status != 200:
+                raise ValueError("Could not download image")
+            data = await resp.read()
+            return io.BytesIO(data)
 
 @bot.event
 async def on_message(message):
     if message.author.bot:
         return
 
-    guild_id = message.guild.id if message.guild else None
-    if guild_id and guild_id in current_animals:
-        animal, caught_by = current_animals[guild_id]
-
-        if caught_by is None and message.content.lower().strip() == animal:
-            current_animals[guild_id] = (animal, message.author.id)
-
-            # Update scores
-            guild_scores = data["scores"].setdefault(str(guild_id), {})
-            guild_scores[str(message.author.id)] = guild_scores.get(str(message.author.id), 0) + 1
-            save_data()
-
-            await message.channel.send(
-                f"🎉 {message.author.mention} caught the **{animal}**!"
-            )
+    # Check if guessing animal
+    for animal in animals.keys():
+        if animal in message.content.lower():
+            leaderboard[message.author.id] = leaderboard.get(message.author.id, 0) + 1
+            await message.channel.send(f"🎉 {message.author.mention} caught the **{animal}** correctly! +1 point")
+            break
 
     await bot.process_commands(message)
 
-
+TOKEN = os.getenv("TOKEN")
 bot.run(TOKEN)
-
