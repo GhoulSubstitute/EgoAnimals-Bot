@@ -70,8 +70,7 @@ async def drop_animals():
     if channel:
         animal, img = random.choice(list(animals.items()))
         current_animal = animal
-        await channel.send("🐾 A wild animal appeared! Type its name to catch it!")
-        await channel.send(img)
+        await channel.send(f"🐾 A wild **{animal}** appeared! Type its name to catch it!\n{img}")
 
 
 # Detect guesses
@@ -93,4 +92,3 @@ async def on_message(message):
 
 # Run bot (Railway env)
 bot.run(os.getenv("TOKEN"))
-
