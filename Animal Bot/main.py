@@ -4,7 +4,9 @@ import random
 import asyncio
 import json
 from pathlib import Path
+import os
 
+TOKEN = os.getenv("TOKEN")
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -121,4 +123,5 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
-bot.run("YOUR_TOKEN")
+bot.run(TOKEN)
+
