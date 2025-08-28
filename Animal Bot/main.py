@@ -19,10 +19,10 @@ current_animal = None
 
 # Animals + images
 animals = {
-    "cat": "https://placekitten.com/300/300",
-    "dog": "https://placedog.net/400/400",
-    "fox": "https://randomfox.ca/images/1.jpg",
-    "panda": "https://cdn.pixabay.com/photo/2017/08/01/00/39/panda-2568857_1280.jpg"
+    "cat": "https://tenor.com/view/emil-dresden-emil-dresden-gif-199203684723448541",
+    "dog": "https://tenor.com/view/dog-smirk-dog-funny-dog-gif-25965620",
+    "fox": "https://tenor.com/view/fox-foxes-cute-snow-poke-gif-9290384749482771871",
+    "panda": "https://tenor.com/view/huahua-huahuapanda-tracee-panda-cute-gif-269890388739476002"
 }
 
 
@@ -93,3 +93,4 @@ async def on_message(message):
 
 # Run bot (Railway env)
 bot.run(os.getenv("TOKEN"))
+
