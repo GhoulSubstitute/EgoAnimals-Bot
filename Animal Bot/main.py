@@ -12,7 +12,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 drop_channel_id = None
 
 # Store leaderboard {user_id: score}
-leaderboard = {}
+scores = {}   # <--- renamed to avoid conflict
 
 # Current drop
 current_animal = None
@@ -47,11 +47,11 @@ async def setchannel(ctx, channel_id: int):
 # Leaderboard command
 @bot.command()
 async def leaderboard(ctx):
-    if not leaderboard:
+    if not scores:
         await ctx.send("No catches yet!")
         return
 
-    sorted_lb = sorted(leaderboard.items(), key=lambda x: x[1], reverse=True)
+    sorted_lb = sorted(scores.items(), key=lambda x: x[1], reverse=True)
     msg = "**Leaderboard:**\n"
     for i, (user_id, score) in enumerate(sorted_lb, 1):
         user = await bot.fetch_user(user_id)
@@ -84,7 +84,7 @@ async def on_message(message):
 
     if current_animal and message.channel.id == drop_channel_id:
         if message.content.lower().strip() == current_animal:
-            leaderboard[message.author.id] = leaderboard.get(message.author.id, 0) + 1
+            scores[message.author.id] = scores.get(message.author.id, 0) + 1
             await message.channel.send(f"🎉 {message.author.mention} caught the {current_animal}!")
             current_animal = None  # reset after catch
 
@@ -92,4 +92,4 @@ async def on_message(message):
 
 
 # Run bot (Railway env)
-bot.run(os.getenv("TOKEN"))    
+bot.run(os.getenv("TOKEN"))
