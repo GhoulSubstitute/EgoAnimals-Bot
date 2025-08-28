@@ -58,4 +58,4 @@ async def drop_animals():
 bot.loop.create_task(drop_animals())
 
 # Run the bot (Railway style)
-bot.run(os.getenv("TOKEN"))
+bot.run(os.getenv("DISCORD_TOKEN"))
