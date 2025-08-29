@@ -110,7 +110,7 @@ async def leaderboard(ctx):
     await ctx.send(embed=embed)
 
 
-@tasks.loop(minutes=1)
+@tasks.loop(minutes=30)
 async def drop_animals():
     global current_animal, current_rarity
     if drop_channel_id is None:
@@ -168,4 +168,5 @@ async def on_message(message):
 
 
 bot.run(os.getenv("TOKEN"))
+
 
