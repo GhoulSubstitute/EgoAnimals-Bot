@@ -55,7 +55,7 @@ async def leaderboard(ctx):
     sorted_lb = sorted(scores.items(), key=lambda x: x[1], reverse=True)
     msg = "**Leaderboard:**\n"
     for i, (user_id, score) in enumerate(sorted_lb, 1):
-        user = await bot.fetch_user(user_id) caught
+        user = await bot.fetch_user(user_id)
         msg += f"{i}. {user.name} - {score} animals\n"
     await ctx.send(msg)
 
@@ -93,4 +93,5 @@ async def on_message(message):
 
 # Run bot (Railway env)
 bot.run(os.getenv("TOKEN"))
+
 
