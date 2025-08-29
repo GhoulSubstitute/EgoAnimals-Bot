@@ -19,11 +19,12 @@ current_animal = None
 
 # Animals + images
 animals = {
-    "cat": "https://tenor.com/view/emil-dresden-emil-dresden-gif-199203684723448541",
-    "dog": "https://tenor.com/view/dog-smirk-dog-funny-dog-gif-25965620",
-    "fox": "https://tenor.com/view/fox-foxes-cute-snow-poke-gif-9290384749482771871",
-    "panda": "https://tenor.com/view/huahua-huahuapanda-tracee-panda-cute-gif-269890388739476002"
+    "cat": "https://media.tenor.com/4y-1KJdP4xQAAAAC/cat-cute.gif",
+    "dog": "https://media.tenor.com/5Rmbz9t5XQ0AAAAC/dog-smirk.gif",
+    "fox": "https://media.tenor.com/ZpH_Z-7rOZQAAAAC/fox-snow.gif",
+    "panda": "https://media.tenor.com/8Vy6bFp0tXwAAAAC/panda-cute.gif"
 }
+
 
 
 @bot.event
@@ -54,7 +55,7 @@ async def leaderboard(ctx):
     sorted_lb = sorted(scores.items(), key=lambda x: x[1], reverse=True)
     msg = "**Leaderboard:**\n"
     for i, (user_id, score) in enumerate(sorted_lb, 1):
-        user = await bot.fetch_user(user_id)
+        user = await bot.fetch_user(user_id) caught
         msg += f"{i}. {user.name} - {score} animals\n"
     await ctx.send(msg)
 
@@ -92,3 +93,4 @@ async def on_message(message):
 
 # Run bot (Railway env)
 bot.run(os.getenv("TOKEN"))
+
